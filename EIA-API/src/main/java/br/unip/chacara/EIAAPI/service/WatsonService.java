@@ -27,7 +27,7 @@ public class WatsonService {
 	@Autowired
 	private WatsonSessionService watsonSessionService;
 	
-	public String callWatson(MensagemWatsonDTO message) {
+	public MensagemWatsonDTO callWatson(MensagemWatsonDTO message) {
 		if(message.getIdUser() == 0){
 			User user = new User();			
 			user.setEmail("");
@@ -52,8 +52,12 @@ public class WatsonService {
 		  .build();
 
 		MessageResponse response = assistant.message(options).execute().getResult();	
-
-		return response.getOutput().getGeneric().get(0).text();
+		if(response.getOutput().getGeneric().size() > 0) {
+			message.setMensagemRetorno(response.getOutput().getGeneric().get(0).text());
+		}else {
+			message.setMensagemRetorno("");
+		}
+		return message;
 	}
 	
 	public String getSession(long idUser) {
@@ -96,7 +100,7 @@ public class WatsonService {
 		// Calculate time difference 
         // in milliseconds 
         long difference_In_Time 
-            = data.getTime() - dataAtual.getTime(); 
+            = dataAtual.getTime() - data.getTime(); 
         
         //Calculate time difference 
         // in minutes

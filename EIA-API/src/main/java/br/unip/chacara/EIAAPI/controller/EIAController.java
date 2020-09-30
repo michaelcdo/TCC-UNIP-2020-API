@@ -17,7 +17,7 @@ public class EIAController {
 	public MensagemWatsonDTO watson(@RequestBody MensagemWatsonDTO mensagem) {
 		
 		try {
-			mensagem.setMensagemRetorno(watsonService.callWatson(mensagem));
+			mensagem = watsonService.callWatson(mensagem);
 		}catch (Exception e) {
 			mensagem.setMensagemRetorno("Erro");
 		}
