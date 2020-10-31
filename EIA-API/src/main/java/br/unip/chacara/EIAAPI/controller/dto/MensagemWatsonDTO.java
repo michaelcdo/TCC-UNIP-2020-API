@@ -1,9 +1,12 @@
 package br.unip.chacara.EIAAPI.controller.dto;
 
+import java.util.List;
+
 public class MensagemWatsonDTO {
 	private long idUser;
 	private String mensagemEntrada;
-	private String mensagemRetorno;
+	private List<String> mensagemRetorno;
+	private int codRetorno;
 	
 	public long getIdUser() {
 		return idUser;
@@ -17,12 +20,16 @@ public class MensagemWatsonDTO {
 	public void setMensagemEntrada(String mensagemEntrada) {
 		this.mensagemEntrada = mensagemEntrada;
 	}
-	public String getMensagemRetorno() {
+	public List<String> getMensagemRetorno() {
 		return mensagemRetorno;
 	}
-	public void setMensagemRetorno(String mensagemRetorno) {
+	public void setMensagemRetorno(List<String> mensagemRetorno) {
 		this.mensagemRetorno = mensagemRetorno;
 	}
-	
-	
+	public int getCodRetorno() {
+		return codRetorno;
+	}
+	public void setCodRetorno(int codRetorno) {
+		this.codRetorno = codRetorno;
+	}
 }

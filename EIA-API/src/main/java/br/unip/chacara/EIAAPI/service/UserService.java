@@ -28,8 +28,8 @@ public class UserService {
 		return repository.findById(id).orElse(null);
 	}
 	
-	public User getUserByName(String name){
-		return repository.findByName(name).orElse(null);
+	public User getUserByNome(String nome){
+		return repository.findByNome(nome).orElse(null);
 	}
 	
 	public void deleteUser(Long id) {
@@ -38,7 +38,7 @@ public class UserService {
 	
 	public User updateUser(User user) {
 		User existingUser = repository.findById(user.getId()).orElse(user);
-		existingUser.setName(user.getName());
+		existingUser.setNome(user.getNome());
 		existingUser.setEmail(user.getEmail());
 		return repository.save(existingUser);
 	}

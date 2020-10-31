@@ -1,5 +1,6 @@
 package br.unip.chacara.EIAAPI.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,12 @@ import com.ibm.watson.assistant.v2.model.CreateSessionOptions;
 import com.ibm.watson.assistant.v2.model.MessageInput;
 import com.ibm.watson.assistant.v2.model.MessageOptions;
 import com.ibm.watson.assistant.v2.model.MessageResponse;
+import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import com.ibm.watson.assistant.v2.model.SessionResponse;
 
 import br.unip.chacara.EIAAPI.controller.dto.MensagemWatsonDTO;
 import br.unip.chacara.EIAAPI.controller.util.EIAAPIConstants;
+import br.unip.chacara.EIAAPI.model.Humor;
 import br.unip.chacara.EIAAPI.model.User;
 import br.unip.chacara.EIAAPI.model.WatsonSession;
 
@@ -22,20 +25,12 @@ import br.unip.chacara.EIAAPI.model.WatsonSession;
 public class WatsonService {
 
 	@Autowired
-	private UserService userService;
+	private HumorService humorService;
 	
 	@Autowired
 	private WatsonSessionService watsonSessionService;
 	
 	public MensagemWatsonDTO callWatson(MensagemWatsonDTO message) {
-		if(message.getIdUser() == 0){
-			User user = new User();			
-			user.setEmail("");
-			user.setName("");
-			user = userService.saveUser(user);
-			message.setIdUser(user.getId());
-		}
-		
 		String watsonSession = getSession(message.getIdUser());
 		
 		IamAuthenticator authenticator = new IamAuthenticator(EIAAPIConstants.APIKey);
@@ -52,11 +47,8 @@ public class WatsonService {
 		  .build();
 
 		MessageResponse response = assistant.message(options).execute().getResult();	
-		if(response.getOutput().getGeneric().size() > 0) {
-			message.setMensagemRetorno(response.getOutput().getGeneric().get(0).text());
-		}else {
-			message.setMensagemRetorno("");
-		}
+		
+		message.setMensagemRetorno(trataMensagens(response, message.getIdUser()));
 		return message;
 	}
 	
@@ -113,5 +105,27 @@ public class WatsonService {
         	return false;
         
         return true;
+	}
+	private ArrayList<String> trataMensagens(MessageResponse response, long idUser) {
+		ArrayList<String> respostas = new ArrayList<>();
+		for (RuntimeResponseGeneric resp : response.getOutput().getGeneric()) {
+			if(resp.text()!=null) {
+				String rep = resp.text();
+				for (int i = 0; i < EIAAPIConstants.EMOTIONS.length; i++) {
+					if(rep.contains(EIAAPIConstants.EMOTIONS[i])) {
+						rep.replace(EIAAPIConstants.EMOTIONS[i], "");
+						Humor hm = new Humor();
+						hm.setDtGravacao(new Date());
+						hm.setCodHumor(i+1);
+						hm.setIdUser(idUser);
+						humorService.saveHumor(hm);
+					}
+				}
+				if(!rep.equals("")) {
+					respostas.add(rep);
+				}
+			}
+		}
+		return respostas;
 	}
 }
