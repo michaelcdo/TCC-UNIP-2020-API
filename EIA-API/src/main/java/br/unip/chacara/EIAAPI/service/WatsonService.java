@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.watson.assistant.v2.Assistant;
 import com.ibm.watson.assistant.v2.model.CreateSessionOptions;
+import com.ibm.watson.assistant.v2.model.DialogNodeOutputOptionsElement;
 import com.ibm.watson.assistant.v2.model.MessageInput;
 import com.ibm.watson.assistant.v2.model.MessageOptions;
 import com.ibm.watson.assistant.v2.model.MessageResponse;
@@ -111,6 +112,7 @@ public class WatsonService {
 		for (RuntimeResponseGeneric resp : response.getOutput().getGeneric()) {
 			if(resp.text()!=null) {
 				String rep = resp.text();
+				boolean humor=false;
 				for (int i = 0; i < EIAAPIConstants.EMOTIONS.length; i++) {
 					if(rep.contains(EIAAPIConstants.EMOTIONS[i])) {
 						rep.replace(EIAAPIConstants.EMOTIONS[i], "");
@@ -119,13 +121,27 @@ public class WatsonService {
 						hm.setCodHumor(i+1);
 						hm.setIdUser(idUser);
 						humorService.saveHumor(hm);
+						humor = true;
 					}
 				}
-				if(!rep.equals("")) {
+				if(!rep.equals("") && !humor) {
 					respostas.add(rep);
 				}
 			}
+			if(resp.title()!=null && !resp.title().trim().equals("")) {
+				respostas.add(resp.title());
+				for (DialogNodeOutputOptionsElement dlg : resp.options()) {
+					if(dlg.getLabel()!=null && !dlg.getLabel().trim().equals("")) {
+						respostas.add(dlg.getLabel());
+					}
+				}
+			}
+			if(resp.topic()!=null && !resp.topic().trim().equals("")) {
+				respostas.add(resp.topic());
+			}
+		
 		}
+		
 		return respostas;
 	}
 }
